@@ -1,23 +1,60 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
-import os
+import os.path
 import sys
 
-app = Flask(__name__)
+currentdirectory = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(currentdirectory, 'database.db')
 
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+app = Flask(__name__)
+app.secret_key = 'this-key-is-very-secret'
 
 @app.route('/')
 def redirect_signup():
-    return redirect('/register')
+    return redirect(url_for('register'))
 
-@app.route('/register')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['Email']
+        password = request.form['Password']
+        hashed_pass = generate_password_hash(password)
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user['password_hash'], password):
+            return "Login Successful!"
+        else:
+            flash('Invalid Email or Password')
+            return render_template('login.html')
+
+    return render_template('login.html', page='login')
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('login.html')
+    if request.method == 'POST':
+        email = request.form['Email']
+        password = request.form['Password']
+
+        hashed_pass = generate_password_hash(password)
+
+        try:
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute('INSERT INTO users (email, password_hash) VALUES (?, ?)', (email, hashed_pass))
+                conn.commit()
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            flash('Email already registered!')
+            return render_template('login.html')
+
+    return render_template('login.html', page='register')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

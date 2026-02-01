@@ -16,18 +16,35 @@
     </head>
     <body>
         <div class="min-vh-100 d-flex justify-content-center align-items-center text-center">
-            <form class="max-width: 500px border-dark-subtle rounded-3 pt-3 pb-3 px-5 bg-white">
+            <form class="max-width: 500px border-dark-subtle rounded-3 pt-3 pb-3 px-5 bg-white" action="" method="POST">
                 <h1>Log in to Placid</h1>
+
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-info py-2">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
                 <div class="mb-3">
                     <label for="emailInputEmail1" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    <input type="email" class="form-control" id="emailInputEmail1" name="Email" aria-describedby="emailHelp">
                     <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                 </div>
                 <div>
-                    <label for="exampleInputPassword1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1">
+                    <label for="InputPassword1" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="InputPassword1" name="Password">
                 </div>
                 <button type="submit" class="btn btn-success m-2">Submit</button>
+
+                <div class="mt- text-center">
+                    {% if page == 'register' %}
+                        <p class="small">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+                    {% else %}
+                        <p class="small">Need an account? <a href="{{ url_for('register') }}">Register here</a></p>
+                    {% endif %}
+                </div>
             </form>
         </div>
     </body>
