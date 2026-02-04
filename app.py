@@ -58,5 +58,18 @@ def register():
 
     return render_template('login.html', page='register')
 
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        flash("Please log in first!")
+        return(url_for('login'))
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
+
+    tasks = cursor.execute('SELECT * from tasks WHERE user_id = ?', (session['user_id'],)).fetchall()
+    
+    return render_template('dashboard.html', user=user, tasks=tasks)
 if __name__ == '__main__':
     app.run(debug=True, port=5555)
