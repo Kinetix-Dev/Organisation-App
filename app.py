@@ -30,9 +30,11 @@ def login():
 
         if user and check_password_hash(user['password_hash'], password):
             return "Login Successful!"
+            session['user_id'] = user['id']
+            session['user_email'] = user['email']
         else:
             flash('Invalid Email or Password')
-            return render_template('login.html')
+            return render_template('login.html', page='login')
 
     return render_template('login.html', page='login')
 
@@ -52,7 +54,7 @@ def register():
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             flash('Email already registered!')
-            return render_template('login.html')
+            return render_template('login.html', page='register')
 
     return render_template('login.html', page='register')
 
