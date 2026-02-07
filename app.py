@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, session
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
 import os.path
@@ -29,9 +29,9 @@ def login():
         conn.close()
 
         if user and check_password_hash(user['password_hash'], password):
-            return "Login Successful!"
             session['user_id'] = user['id']
             session['user_email'] = user['email']
+            return redirect(url_for('dashboard'))
         else:
             flash('Invalid Email or Password')
             return render_template('login.html', page='login')
@@ -62,13 +62,15 @@ def register():
 def dashboard():
     if 'user_id' not in session:
         flash("Please log in first!")
-        return(url_for('login'))
+        return redirect(url_for('login'))
 
     conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
 
+    user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
     tasks = cursor.execute('SELECT * from tasks WHERE user_id = ?', (session['user_id'],)).fetchall()
+    conn.close()
     
     return render_template('dashboard.html', user=user, tasks=tasks)
 if __name__ == '__main__':

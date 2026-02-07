@@ -7,11 +7,12 @@ CREATE TABLE users (
 
 CREATE TABLE tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL
-    title TEXT NOT NULL
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
     task_type TEXT,
     difficulty TEXT,
     points_value INTEGER,
-    is recurring BOOLEAN DEFAULT 0,
+    is_recurring BOOLEAN DEFAULT 0,
+    is_completed BOOLEAN DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users (id)
 )
