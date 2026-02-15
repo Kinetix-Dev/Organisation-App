@@ -6,6 +6,8 @@
     <title>Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         body {
@@ -29,6 +31,15 @@
                 themeSystem: 'bootstrap5'
             });
             calendar.render()
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            flatpickr("#datepicker", {
+                dateFormat: "Y-m-d", 
+                allowInput: true
+            });
+            document.querySelector("#calendar-icon").addEventListener("click", function () {
+                datepicker.open();
+            });
         });
     </script>
 </head>
@@ -60,34 +71,57 @@
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4">Your Tasks</h4> 
+                        {% for task in tasks %}
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <strong>{{ task.title }}</strong>
+                                <small class="text-muted">({{ task.task_type }})</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-info text-dark">{{ task.difficulty }}</span>
+                                <a href="/delete-task/ {{ task.id }}" class="btn btn-sm btn-outline-danger ms-2">Delete</a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No Tasks Found. Add one!</p>
+                        {% endfor %}
                     </div>
                 </div>
 
                 <div class="card shadow-sm border-0 rounded-4 my-4">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4">New Task</h4> 
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Task Title</span>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Difficulty</span>
-                            <select class="form-select" aria-label="Task Difficulty">
-                                <option selected>Task Difficulty</option>
-                                <option value="1">Easy</option>
-                                <option value="2">Medium</option>
-                                <option value="3">Hard</option>
-                            </select>
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Type</span>
-                            <select class="form-select" aria-label="Task Type">
-                                <option selected>Task Type</option>
-                                <option value="1">Work</option>
-                                <option value="2">Personal</option>
-                                <option value="3">Fitness</option>
-                            </select>
-                        </div>
+                        <form action="/add_task" method="POST">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Task Title</span>
+                                <input type="text" class="form-control" name="title">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">Difficulty</span>
+                                <select class="form-select" aria-label="Task Difficulty" name="difficulty">
+                                    <option selected>Task Difficulty</option>
+                                    <option value="1">Easy</option>
+                                    <option value="2">Medium</option>
+                                    <option value="3">Hard</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">Type</span>
+                                <select class="form-select" aria-label="Task Type" name="task_type">
+                                    <option selected>Task Type</option>
+                                    <option value="1">Work</option>
+                                    <option value="2">Personal</option>
+                                    <option value="3">Fitness</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">Due Date</span>
+                                <input type="text" id="datepicker" class="form-control" name="due_date" placeholder="Select a date">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary rounded-pill w-100">Add Task</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -96,14 +130,9 @@
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4">Filters</h4> 
                         <div class="d-flex flex-column gap-2">
-                            <input type="checkbox" id="btn-check-work" class="btn-check" autocomplete="off">
-                            <label class="btn btn-outline-primary rounded-pill" for="btn-check-work">Work</label>
-
-                            <input type="checkbox" id="btn-check-personal" class="btn-check" autocomplete="off">
-                            <label class="btn btn-outline-secondary rounded-pill" for="btn-check-personal">Personal</label>
-                            
-                            <input type="checkbox" id="btn-check-fitness" class="btn-check" autocomplete="off">
-                            <label class="btn btn-outline-success rounded-pill" for="btn-check-fitness">Fitness</label>
+                            <a href="/dashboard?filter=Work" class="btn btn-outline-primary rounded-pill">Work</a>
+                            <a href="/dashboard?filter=Personal" class="btn btn-outline-secondary rounded-pill">Personal</a>
+                            <a href="/dashboard?filter=Fitness" class="btn btn-outline-success rounded-pill">Fitness</a>
                         </div>
                     </div>
  

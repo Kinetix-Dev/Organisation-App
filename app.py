@@ -71,7 +71,27 @@ def dashboard():
     user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
     tasks = cursor.execute('SELECT * from tasks WHERE user_id = ?', (session['user_id'],)).fetchall()
     conn.close()
-    
+
     return render_template('dashboard.html', user=user, tasks=tasks)
+    
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    if 'user_id' not in session:
+        flash("Please log in first!")
+        return redirect(url_for('login'))
+
+    title = request.form.get('title')
+    difficulty = request.form.get('difficulty')
+    task_type = request.form.get('task_type')
+    due_date = request.form.get('due_date')
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO tasks (user_id, title, difficulty, task_type, due_date) VALUES (?, ?, ?, ?, ?)', (session['user_id'], title, difficulty, task_type, due_date))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('dashboard'))
+
 if __name__ == '__main__':
     app.run(debug=True, port=5555)
