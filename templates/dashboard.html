@@ -5,30 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         body {
             background-image: url("https://images.pexels.com/photos/35743923/pexels-photo-35743923.jpeg");
             background-repeat: no-repeat;
             background-size: cover;
-            background-position: top;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
-        
-        th {
-            background-color: #f2f2f2;
+            background-position: center;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calenderEl = document.getElementById('calendar-container');
+            var calendar = new FullCalendar.Calendar(calenderEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                height: 350,
+                themeSystem: 'bootstrap5'
+            });
+            calendar.render()
+        });
+    </script>
 </head>
 <body>
     <div class="nav_bar">
@@ -64,6 +66,28 @@
                 <div class="card shadow-sm border-0 rounded-4 my-4">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4">New Task</h4> 
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">Task Title</span>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">Difficulty</span>
+                            <select class="form-select" aria-label="Task Difficulty">
+                                <option selected>Task Difficulty</option>
+                                <option value="1">Easy</option>
+                                <option value="2">Medium</option>
+                                <option value="3">Hard</option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">Type</span>
+                            <select class="form-select" aria-label="Task Type">
+                                <option selected>Task Type</option>
+                                <option value="1">Work</option>
+                                <option value="2">Personal</option>
+                                <option value="3">Fitness</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,11 +95,22 @@
                 <div class="card shadow-sm border-0 rounded-4  sticky-top" style="top: 20px;">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4">Filters</h4> 
-                    </div>
+                        <div class="d-flex flex-column gap-2">
+                            <input type="checkbox" id="btn-check-work" class="btn-check" autocomplete="off">
+                            <label class="btn btn-outline-primary rounded-pill" for="btn-check-work">Work</label>
 
+                            <input type="checkbox" id="btn-check-personal" class="btn-check" autocomplete="off">
+                            <label class="btn btn-outline-secondary rounded-pill" for="btn-check-personal">Personal</label>
+                            
+                            <input type="checkbox" id="btn-check-fitness" class="btn-check" autocomplete="off">
+                            <label class="btn btn-outline-success rounded-pill" for="btn-check-fitness">Fitness</label>
+                        </div>
+                    </div>
+ 
                     <div class="card-footer p-4">
                         <div class="container">
-                            This will be a calendar
+                            <h5 class="mb-3">Schedule</h5>
+                            <div id="calendar-container"></div>
                         </div>
                     </div>
                 </div>
