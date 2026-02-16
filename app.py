@@ -93,5 +93,37 @@ def add_task():
 
     return redirect(url_for('dashboard'))
 
+@app.route('/delete_task/<int:task_id>')
+def delete_task(task_id):
+    if 'user_id' not in session:
+        flash("Please log in first!")
+        return redirect(url_for('login'))
+    
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM tasks WHERE id = ? AND user_id = ?', (task_id, session['user_id']))
+    flash("Task deleted!")
+    return redirect(url_for('dashboard'))
+
+@app.route('/edit_task/<int:task_id>', methods=['POST'])
+def edit_task(task_id):
+    if 'user_id' not in session:
+        flash("Please log in first!")
+        return redirect(url_for('login'))
+    
+    title = request.form.get('title')
+    difficulty = request.form.get('difficulty')
+    points_value = request.form.get('points_value')
+    due_date = request.form.get('due_date')
+    
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''UPDATE tasks 
+                       SET title = ?, difficulty = ?, points_value = ?, due_date = ?
+                       WHERE id = ? AND user_id = ?''', (title, difficulty, points_value, due_date, task_id, session['user_id']))
+        flash("Task updated!")
+        return redirect(url_for('dashboard'))
+    
+
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

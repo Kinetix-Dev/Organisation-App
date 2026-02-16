@@ -33,7 +33,7 @@
             calendar.render()
         });
         document.addEventListener('DOMContentLoaded', function () {
-            flatpickr("#datepicker", {
+            flatpickr(".datepicker", {
                 dateFormat: "Y-m-d", 
                 allowInput: true
             });
@@ -78,12 +78,39 @@
                                 <small class="text-muted">({{ task.task_type }})</small>
                             </div>
                             <div>
-                                <span class="badge bg-info text-dark">{{ task.difficulty }}</span>
-                                <a href="/delete-task/ {{ task.id }}" class="btn btn-sm btn-outline-danger ms-2">Delete</a>
+                                <span class="badge bg-info text-dark me-2">{{ task.difficulty }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ task.id }}">Edit</button>
+                                <a href="/delete_task/{{ task.id }}" class="btn btn-sm btn-outline-danger ms-2">Delete</a>
                             </div>
                         </div>
                         {% else %}
                         <p class="text-muted">No Tasks Found. Add one!</p>
+                        {% endfor %}
+                        {% for task in tasks %}
+                        <div class="modal fade" id="editModal{{ task.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content rounded-4 border-0 shadow">
+                                    <div class="modal-header">
+                                        <h5>Edit Task</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-table="Close"></button>
+                                    </div>
+                                    <form action="/edit_task/{{ task.id }}" method="POST">
+                                        <div class="modal-body">
+                                            <input type="text" name="title" class="form-control mb-2" value="{{ task.title }}" required>
+                                            <select name="difficulty" class="form-select mb-2">
+                                                <option value="1" {% if task.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                                                <option value="2" {% if task.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
+                                                <option value="3" {% if task.difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                                            </select>
+                                            <input type="text" name="due_date" class="form-control datepicker" value="{{ task.due_date }}">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn bg-success rounded-pill">Save Changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -116,7 +143,7 @@
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text" id="basic-addon1">Due Date</span>
-                                <input type="text" id="datepicker" class="form-control" name="due_date" placeholder="Select a date">
+                                <input type="text"  class="form-control datepicker" name="due_date" placeholder="Select a date">
                             </div>
                             <div>
                                 <button type="submit" class="btn btn-primary rounded-pill w-100">Add Task</button>
