@@ -58,6 +58,12 @@ def register():
 
     return render_template('login.html', page='register')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("You have been logged out.")
+    return redirect(url_for('login'))
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:

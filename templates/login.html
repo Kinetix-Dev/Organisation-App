@@ -17,7 +17,11 @@
     <body>
         <div class="min-vh-100 d-flex justify-content-center align-items-center text-center">
             <form class="max-width: 500px border-dark-subtle rounded-3 pt-3 pb-3 px-5 bg-white" action="" method="POST">
-                <h1>Log in to Placid</h1>
+                {% if page == 'register' %}
+                    <h1>Register with Placid</h1>
+                {% else %}
+                    <h1>Log in to Placid</h1>
+                    {% endif %}
 
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
