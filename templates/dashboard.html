@@ -66,6 +66,18 @@
     </div>
 
     <div class="container py-5">
+        <div class="container mt-3">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info alert-dismissable fade show rounded-pill shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div> 
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
         <div class="g-4 row">
             <div class="col-lg-8">
                 <div class="card shadow-sm border-0 rounded-4">
@@ -80,7 +92,8 @@
                             <div>
                                 <span class="badge bg-info text-dark me-2">{{ task.difficulty }}</span>
                                 <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ task.id }}">Edit</button>
-                                <a href="/delete_task/{{ task.id }}" class="btn btn-sm btn-outline-danger ms-2">Delete</a>
+                                <a href="/delete_task/{{ task.id }}" class="btn btn-sm btn-outline-danger \">Delete</a>
+                                <a href="/complete_task/{{ task.id }}" class="btn btn-sm btn-success" me-2>Done</a>
                             </div>
                         </div>
                         {% else %}

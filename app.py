@@ -75,7 +75,7 @@ def dashboard():
     cursor = conn.cursor()
 
     user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
-    tasks = cursor.execute('SELECT * from tasks WHERE user_id = ?', (session['user_id'],)).fetchall()
+    tasks = cursor.execute('SELECT * from tasks WHERE user_id = ? AND is_completed = 0', (session['user_id'],)).fetchall()
     conn.close()
 
     return render_template('dashboard.html', user=user, tasks=tasks)
@@ -129,6 +129,19 @@ def edit_task(task_id):
                        WHERE id = ? AND user_id = ?''', (title, difficulty, points_value, due_date, task_id, session['user_id']))
         flash("Task updated!")
         return redirect(url_for('dashboard'))
+
+@app.route('/complete_task/<int:task_id>')
+def complete_task(task_id):
+   if 'user_id' not in session:
+        flash("Please log in first!")
+        return redirect(url_for('login'))
+   
+   with sqlite3.connect(db_path) as conn:
+       cursor = conn.cursor()
+       cursor.execute('UPDATE tasks SET is_completed = 1 WHERE id = ? AND user_id = ?', (task_id, session['user_id']))
+
+       flash("Task completed! Points awarded.")
+       return redirect(url_for('dashboard'))
     
 
 if __name__ == '__main__':
