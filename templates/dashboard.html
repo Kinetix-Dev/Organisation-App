@@ -11,10 +11,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         body {
-            background-image: url("https://images.pexels.com/photos/35743923/pexels-photo-35743923.jpeg");
+            background-image: url("static/dashboard_bg.jpeg");
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
         }
     </style>
     <script>
@@ -116,9 +118,9 @@
                                         <div class="modal-body">
                                             <input type="text" name="title" class="form-control mb-2" value="{{ task.title }}" required>
                                             <select name="difficulty" class="form-select mb-2">
-                                                <option value="1" {% if task.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
-                                                <option value="2" {% if task.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
-                                                <option value="3" {% if task.difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                                                <option value="Easy" {% if task.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                                                <option value="Medium" {% if task.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
+                                                <option value="Hard" {% if task.difficulty == 'Hard' %}selected{% endif %}>Hard</option>
                                             </select>
                                             <input type="text" name="due_date" class="form-control datepicker" value="{{ task.due_date }}">
                                         </div>
@@ -154,9 +156,9 @@
                                 <span class="input-group-text" id="basic-addon1">Type</span>
                                 <select class="form-select" aria-label="Task Type" name="task_type">
                                     <option selected>Task Type</option>
-                                    <option value="1">Work</option>
-                                    <option value="2">Personal</option>
-                                    <option value="3">Fitness</option>
+                                    <option value="Work">Work</option>
+                                    <option value="Personal">Personal</option>
+                                    <option value="Fitness">Fitness</option>
                                 </select>
                             </div>
                             <div class="input-group mb-3">
@@ -175,9 +177,10 @@
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4">Filters</h4> 
                         <div class="d-flex flex-column gap-2">
-                            <a href="/dashboard?filter=Work" class="btn btn-outline-primary rounded-pill">Work</a>
-                            <a href="/dashboard?filter=Personal" class="btn btn-outline-secondary rounded-pill">Personal</a>
-                            <a href="/dashboard?filter=Fitness" class="btn btn-outline-success rounded-pill">Fitness</a>
+                            <a href="/dashboard" class="btn {% if not active_filter %}btn-warning{% else %}btn-outline-warning{% endif %} rounded-pill">All Tasks</a>
+                            <a href="/dashboard?filter=Work" class="btn {% if active_filter == 'Work' %}btn-primary {% else %} btn-outline-primary {% endif %} rounded-pill">Work</a>
+                            <a href="/dashboard?filter=Personal" class="btn {% if active_filter == 'Personal' %}btn-secondary {% else %} btn-outline-secondary {% endif %} rounded-pill">Personal</a>
+                            <a href="/dashboard?filter=Fitness" class="btn {% if active_filter == 'Fitness' %}btn-success {% else %} btn-outline-success {% endif %} rounded-pill">Fitness</a>
                         </div>
                     </div>
  

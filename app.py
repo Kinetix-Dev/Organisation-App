@@ -70,6 +70,8 @@ def dashboard():
         flash("Please log in first!")
         return redirect(url_for('login'))
 
+    user_id = session['user_id']
+    active_filter = request.args.get('filter')
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -77,10 +79,16 @@ def dashboard():
     user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
     points_query = 'SELECT SUM(points_value) FROM tasks WHERE user_id = ? AND is_completed = 1'
     total_points = cursor.execute(points_query, (session['user_id'],)).fetchone()[0] or 0
-    tasks = cursor.execute('SELECT * from tasks WHERE user_id = ? AND is_completed = 0', (session['user_id'],)).fetchall()
+    query = 'SELECT * FROM tasks WHERE user_id  = ? AND is_completed = 0'
+    params = [user_id]
+    if active_filter:
+        query += ' AND task_type = ?'
+        params.append(active_filter)
+
+    tasks = cursor.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('dashboard.html', user=user, tasks=tasks, points=total_points)
+    return render_template('dashboard.html', user=user, tasks=tasks, points=total_points, active_filter=active_filter)
     
 @app.route('/add_task', methods=['POST'])
 def add_task():
