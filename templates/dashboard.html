@@ -60,6 +60,11 @@
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>
                 </ul>
+                    <div class="navbar-nav ms-auto">
+                        <span class="nav-link text-white fw-bold bg-black rounded-pill">
+                            Points: {{ points }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -140,9 +145,9 @@
                                 <span class="input-group-text" id="basic-addon1">Difficulty</span>
                                 <select class="form-select" aria-label="Task Difficulty" name="difficulty">
                                     <option selected>Task Difficulty</option>
-                                    <option value="1">Easy</option>
-                                    <option value="2">Medium</option>
-                                    <option value="3">Hard</option>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
                                 </select>
                             </div>
                             <div class="input-group mb-3">

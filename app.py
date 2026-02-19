@@ -75,10 +75,12 @@ def dashboard():
     cursor = conn.cursor()
 
     user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
+    points_query = 'SELECT SUM(points_value) FROM tasks WHERE user_id = ? AND is_completed = 1'
+    total_points = cursor.execute(points_query, (session['user_id'],)).fetchone()[0] or 0
     tasks = cursor.execute('SELECT * from tasks WHERE user_id = ? AND is_completed = 0', (session['user_id'],)).fetchall()
     conn.close()
 
-    return render_template('dashboard.html', user=user, tasks=tasks)
+    return render_template('dashboard.html', user=user, tasks=tasks, points=total_points)
     
 @app.route('/add_task', methods=['POST'])
 def add_task():
@@ -88,12 +90,14 @@ def add_task():
 
     title = request.form.get('title')
     difficulty = request.form.get('difficulty')
+    points_map = {"Easy" : 10, "Medium" : 20, "Hard" : 50}
+    points_value = points_map.get(difficulty, 10)
     task_type = request.form.get('task_type')
     due_date = request.form.get('due_date')
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO tasks (user_id, title, difficulty, task_type, due_date) VALUES (?, ?, ?, ?, ?)', (session['user_id'], title, difficulty, task_type, due_date))
+    cursor.execute('INSERT INTO tasks (user_id, title, difficulty, task_type, due_date, points_value) VALUES (?, ?, ?, ?, ?, ?)', (session['user_id'], title, difficulty, task_type, due_date, points_value))
     conn.commit()
     conn.close()
 
