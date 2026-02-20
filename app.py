@@ -86,9 +86,17 @@ def dashboard():
         params.append(active_filter)
 
     tasks = cursor.execute(query, params).fetchall()
+
+    calendar_events = []
+    for task in tasks:
+        calendar_events.append({
+            'title': task['title'],
+            'start': task['due_date'],
+            'color': '#0d6efd'
+        })
     conn.close()
 
-    return render_template('dashboard.html', user=user, tasks=tasks, points=total_points, active_filter=active_filter)
+    return render_template('dashboard.html', user=user, tasks=tasks, points=total_points, active_filter=active_filter, events=calendar_events)
     
 @app.route('/add_task', methods=['POST'])
 def add_task():

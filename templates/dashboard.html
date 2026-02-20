@@ -18,18 +18,24 @@
             background-attachment: fixed;
             min-height: 100vh;
         }
+        .fc-event {
+
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calenderEl = document.getElementById('calendar-container');
             var calendar = new FullCalendar.Calendar(calenderEl, {
                 initialView: 'dayGridMonth',
+                events: {{ events | tojson }},
+                dayMaxEvents: true,
+                eventDisplay: 'block',
                 headerToolbar: {
                     left: 'prev,next',
                     center: 'title',
                     right: ''
                 },
-                height: 350,
+                height: 425,
                 themeSystem: 'bootstrap5'
             });
             calendar.render()
