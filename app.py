@@ -163,6 +163,25 @@ def complete_task(task_id):
        flash("Task completed! Points awarded.")
        return redirect(url_for('dashboard'))
     
+@app.route('/leaderboard')
+def leaderboard():
+    with sqlite3.connect(db_path) as conn:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        points_query = 'SELECT SUM(points_value) FROM tasks WHERE user_id = ? AND is_completed = 1'
+        total_points = cursor.execute(points_query, (session['user_id'],)).fetchone()[0] or 0
+        query = '''
+            SELECT users.email,
+            SUM(tasks.points_value) as total_earned
+            FROM users
+            JOIN tasks ON users.id = tasks.user_id
+            WHERE tasks.is_completed = 1
+            GROUP BY users.id
+            ORDER BY total_points DESC
+        '''
+        users_ranking = cursor.execute(query).fetchall()
+        return render_template('leaderboard.html', rankings=users_ranking, points=total_points)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

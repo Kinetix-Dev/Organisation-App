@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body {
+            background-image: url("static/leaderboard_bg.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        @media screen and (max-width: 1000px) {
+            .navbar {
+                border-radius: 10px;
+            }
+        }
+        @media screen and (min-width: 1001px) {
+            .navbar {
+                border-radius: var(--bs-border-radius-pill);
+            }
+    </style>
+</head>
+<body>
+    <div class="nav_bar">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary m-2 rounded-pill shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Placid 🕙</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="{{ url_for('dashboard') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('leaderboard') }}" class="nav-link active">Leaderboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+                    <div class="navbar-nav ms-auto">
+                        <span class="nav-link text-white fw-bold bg-black rounded-pill p-2">
+                            Points: {{ points }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="container mt-5">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body">
+                <h2 class="text-center mb-4 card-title">Top achievers 🏆</h2>
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Total Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rankings %}
+                        <tr>
+                            <td>
+                                {% if loop.index == 1 %}
+                                    🥇 <span class="fw-bold text-warning">Gold</span>
+                                {% elif loop.index == 2 %}
+                                    🥈 <span class="fw-bold text-secondary">Silver</span>
+                                {% elif loop.index == 3 %}
+                                    🥉 <span class="fw-bold text-danger">Bronze</span>
+                                {% else %}
+                                    {{ loop.index }}
+                                {% endif %}
+                            </td>
+                            <td>{{ row['email'].split('@')[0] }}</td>
+                            <td>{{ row['total_earned'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
