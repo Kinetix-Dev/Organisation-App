@@ -183,5 +183,20 @@ def leaderboard():
         users_ranking = cursor.execute(query).fetchall()
         return render_template('leaderboard.html', rankings=users_ranking, points=total_points)
 
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        flash("Please log in first!")
+        return redirect(url_for('login'))
+    
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        user = cursor.execute('SELECT email FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+        points_query = 'SELECT SUM(points_value) FROM tasks WHERE user_id = ? AND is_completed = 1'
+        total_points = cursor.execute(points_query, (session['user_id'],)).fetchone()[0] or 0
+        task_count = cursor.execute('SELECT COUNT(*) FROM tasks WHERE user_id = ?', (session['user_id'],)).fetchone()[0]
+    return render_template('profile.html', user=user, points=total_points, task_count=task_count)
+
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

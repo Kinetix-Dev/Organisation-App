@@ -79,9 +79,12 @@
                     </li>
                 </ul>
                     <div class="navbar-nav ms-auto">
-                        <span class="nav-link text-white fw-bold bg-black rounded-pill p-2">
+                        <span class="nav-link text-white fw-bold bg-black rounded-pill p-2 mx-2">
                             Points: {{ points }}
                         </span>
+                    </div>
+                    <div class="navbar-nav">
+                        <a class="btn btn-dark rounded-circle p-2" href="{{ url_for('profile') }}">👤</a>
                     </div>
                 </div>
             </div>
