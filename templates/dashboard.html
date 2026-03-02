@@ -56,6 +56,9 @@
                 datepicker.open();
             });
         });
+        function toggleDays(containerId, checkbox) {
+            document.getElementById(containerId).style.display = checkbox.checked ? 'block' : 'none';
+        }
     </script>
 </head>
 <body>
@@ -142,6 +145,20 @@
                                                 <option value="Hard" {% if task.difficulty == 'Hard' %}selected{% endif %}>Hard</option>
                                             </select>
                                             <input type="text" name="due_date" class="form-control datepicker" value="{{ task.due_date }}">
+                                            <div class="container-fluid px-0">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input type="checkbox" class="form-check-input" name="is_recurring" value="1" id="isRecurringEdit{{ task.id }}" {% if task.is_recurring %}checked{% endif %} onchange="document.getElementById('daysEdit{{ task.id }}').style.display = this.checked ? 'block' : 'none'">
+                                                    <label for="isRecurringEdit{{ task.id }}">Recurring Task</label>
+                                                </div>
+                                                <div id="daysEdit{{ task.id }}" style="display : {% if task.is_recurring %}block{% else %}none{% endif %};">
+                                                    <div  class="btn-group w-100 flex-wrap" role="group">
+                                                        {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                                                        <input type="checkbox" class="btn-check" name="days" value="{{ loop.index0 }}" id="editDay{{ task.id }}-{{ loop.index }}" {% if task.recurring_days and loop.index0|string in task.recurring_days.split(',') %}checked{% endif %}>
+                                                        <label for="editDay{{ task.id }}-{{ loop.index }}" class="btn btn-outline-primary btn-sm">{{ day }}</label>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn bg-success rounded-pill">Save Changes</button>
@@ -183,6 +200,20 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text" id="basic-addon1">Due Date</span>
                                 <input type="text"  class="form-control datepicker" name="due_date" placeholder="Select a date">
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input type="checkbox" class="form-check-input" name="is_recurring" value="1" id="isRecurringAdd" onchange="document.getElementById('daysContainerAdd').style.display = this.checked ? 'block' : 'none'">
+                                <label for="isRecurringAdd" class="form-check-label">Recurring Task</label>
+                            </div>
+
+                            <div id="daysContainerAdd" style="display: none;" class="mb-3">
+                                <label class="form-label d-block small text-muted">Repeat on:</label>
+                                <div class="btn-group w-100" role="group">
+                                    {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                                    <input type="checkbox" class="btn-check" name="days" value="{{ loop.index0 }}" id="addDay{{ loop.index }}">
+                                    <label for="addDay{{ loop.index }}" class="btn btn-outline-primary btn-sm">{{ day }}</label>
+                                    {% endfor %}
+                                </div>
                             </div>
                             <div>
                                 <button type="submit" class="btn btn-primary rounded-pill w-100">Add Task</button>

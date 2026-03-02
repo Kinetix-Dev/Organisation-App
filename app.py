@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime, timedelta
 import sqlite3
 import os.path
 import sys
@@ -70,11 +71,20 @@ def dashboard():
         flash("Please log in first!")
         return redirect(url_for('login'))
 
+    today_index = str(datetime.now().weekday())
     user_id = session['user_id']
     active_filter = request.args.get('filter')
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE tasks
+        SET is_completed = 0
+        WHERE is_recurring = 1 
+        AND is_completed = 1 
+        AND recurring_days LIKE ?
+''', (f'%{today_index}%',))
+    conn.commit()
 
     user = cursor.execute('SELECT * from users WHERE id = ?', (session['user_id'],)).fetchone()
     points_query = 'SELECT SUM(points_value) FROM tasks WHERE user_id = ? AND is_completed = 1'
@@ -89,11 +99,23 @@ def dashboard():
 
     calendar_events = []
     for task in tasks:
-        calendar_events.append({
-            'title': task['title'],
-            'start': task['due_date'],
-            'color': '#0d6efd'
-        })
+        if task['is_recurring'] and task['recurring_days']:
+            days_to_repeat = [int(d) for d in task['recurring_days'].split(',')]
+            start_date = datetime.now()
+            for i in range(30):
+                current_date = start_date + timedelta(days=i)
+                if current_date.weekday() in days_to_repeat:
+                    calendar_events.append({
+                        'title': f"🔁 {task['title']}",
+                        'start': current_date.strftime('%Y-%m-%d'),
+                        'color': '#198754' if task['task_type'] == 'Fitness' else ('#6c757d' if task['task_type'] == 'Personal' else '#0d6efd')
+                    })
+        else:
+            calendar_events.append({
+                'title': task['title'],
+                'start': task['due_date'],
+                'color': '#198754' if task['task_type'] == 'Fitness' else ('#6c757d' if task['task_type'] == 'Personal' else '#0d6efd')
+            })
     conn.close()
 
     return render_template('dashboard.html', user=user, tasks=tasks, points=total_points, active_filter=active_filter, events=calendar_events)
@@ -110,10 +132,13 @@ def add_task():
     points_value = points_map.get(difficulty, 10)
     task_type = request.form.get('task_type')
     due_date = request.form.get('due_date')
+    is_recurring = 1 if request.form.get('is_recurring') else 0
+    selected_days = request.form.getlist('days')
+    recurring_days = ",".join(selected_days) if is_recurring else ""
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO tasks (user_id, title, difficulty, task_type, due_date, points_value) VALUES (?, ?, ?, ?, ?, ?)', (session['user_id'], title, difficulty, task_type, due_date, points_value))
+    cursor.execute('INSERT INTO tasks (user_id, title, difficulty, task_type, due_date, points_value, is_recurring, recurring_days) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (session['user_id'], title, difficulty, task_type, due_date, points_value, is_recurring, recurring_days))
     conn.commit()
     conn.close()
 
@@ -141,13 +166,17 @@ def edit_task(task_id):
     difficulty = request.form.get('difficulty')
     points_value = request.form.get('points_value')
     due_date = request.form.get('due_date')
+    is_recurring = 1 if request.form.get('is_recurring') else 0
+    selected_days = request.form.getlist('days')
+    recurring_days = ",".join(selected_days) if is_recurring else ""
     
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute('''UPDATE tasks 
-                       SET title = ?, difficulty = ?, points_value = ?, due_date = ?
-                       WHERE id = ? AND user_id = ?''', (title, difficulty, points_value, due_date, task_id, session['user_id']))
+                       SET title = ?, difficulty = ?, points_value = ?, due_date = ?, is_recurring = ?, recurring_days = ?
+                       WHERE id = ? AND user_id = ?''', (title, difficulty, points_value, due_date, is_recurring, recurring_days, task_id, session['user_id']))
         flash("Task updated!")
+        conn.commit()
         return redirect(url_for('dashboard'))
 
 @app.route('/complete_task/<int:task_id>')
@@ -157,11 +186,18 @@ def complete_task(task_id):
         return redirect(url_for('login'))
    
    with sqlite3.connect(db_path) as conn:
-       cursor = conn.cursor()
-       cursor.execute('UPDATE tasks SET is_completed = 1 WHERE id = ? AND user_id = ?', (task_id, session['user_id']))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        task = cursor.execute('SELECT * FROM tasks WHERE id = ?', (task_id,)).fetchone()
 
-       flash("Task completed! Points awarded.")
-       return redirect(url_for('dashboard'))
+        if task['is_recurring']:
+            next_date = (datetime.strptime(task['due_date'], '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
+            cursor.execute('UPDATE tasks SET due_date = ? WHERE id = ? AND user_id = ?', (next_date, task_id, session['user_id']))
+        else:
+            cursor.execute('UPDATE tasks SET is_completed = 1 WHERE id = ? AND user_id = ?', (task_id, session['user_id']))
+
+        flash("Task completed! Points awarded.")
+        return redirect(url_for('dashboard'))
     
 @app.route('/leaderboard')
 def leaderboard():

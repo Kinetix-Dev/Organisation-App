@@ -14,5 +14,6 @@ CREATE TABLE tasks (
     points_value INTEGER,
     is_recurring BOOLEAN DEFAULT 0,
     is_completed BOOLEAN DEFAULT 0,
+    recurring_days TEXT DEFAULT '',
     FOREIGN KEY (user_id) REFERENCES users (id)
 )
