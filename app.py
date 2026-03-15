@@ -8,6 +8,8 @@ from flask_mail import Mail, Message
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 
+load_dotenv()
+
 currentdirectory = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(currentdirectory, 'database.db')
 
