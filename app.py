@@ -4,12 +4,15 @@ from datetime import datetime, timedelta
 import sqlite3
 import os.path
 import sys
+from flask_mail import Mail, Message
+from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
 
 currentdirectory = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(currentdirectory, 'database.db')
 
 app = Flask(__name__)
-app.secret_key = 'this-key-is-very-secret'
+app.secret_key = os.getenv('SECRET_KEY')
 
 @app.route('/')
 def redirect_signup():
@@ -234,5 +237,55 @@ def profile():
         task_count = cursor.execute('SELECT COUNT(*) FROM tasks WHERE user_id = ?', (session['user_id'],)).fetchone()[0]
     return render_template('profile.html', user=user, points=total_points, task_count=task_count)
 
+app.config['MAIL_SERVER'] = 'sandbox.smtp.mailtrap.io'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD']:
+    print("WARNING Mail credentials not found. Check your .env file!")
+
+def send_reminder(user_email, task_title, task_points):
+    with app.app_context():
+        msg = Message(
+            subject=f"Don't miss out on {task_points} points!",
+            sender="noreply@placid-app.com",
+            recipients=[user_email]
+        )
+        msg.body = f"Your task '{task_title}' is waiting for you. Complete it now to boost your score!"
+
+        try:
+            mail.send(msg)
+            print("Email sent successfully to Mailtrap!")
+        except Exception as e:
+            print(f"Error sending email as {e}")
+
+def schedule_reminders():
+    with app.app_context():
+        now = datetime.now()
+        tomorrow = (now + timedelta(days=1)).strftime('%Y-%m-%d')
+
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            query = '''
+                SELECT users.email, tasks.title, tasks.points_value
+                FROM tasks
+                JOIN users ON tasks.user_id = users.id
+                WHERE tasks.due_date = ? AND tasks.is_completed = 0
+'''
+            due_tasks = cursor.execute(query, (tomorrow,)).fetchall()
+
+            for task in due_tasks:
+                send_reminder(task['email'], task['title'], task['points_value'])
+
+mail = Mail(app)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=schedule_reminders, trigger="interval", hours=24)
+scheduler.start()
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5555)
+    app.run(debug=True, port=5555, use_reloader=False)
